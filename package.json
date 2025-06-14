@@ -1,0 +1,19 @@
+{
+  "name": "telegram-random-chat",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "dependencies": {
+    "haversine-distance": "^1.2.3",
+    "lowdb": "^7.0.1",
+    "node-telegram-bot-api": "^0.66.0",
+    "uuid": "^11.1.0"
+  }
+}
