@@ -1,14 +1,13 @@
 const TelegramBot = require('node-telegram-bot-api');
 const haversine = require('haversine-distance');
 const { v4: uuidv4 } = require('uuid');
-
-const bot = new TelegramBot('YOUR_BOT_TOKEN', { polling: true }); // Replace with your actual token
+const bot = new TelegramBot('7939545908:AAGqUfdD0RkS_VyqRYJAFfru37bDwufEzs0', { polling: true });
 
 const users = new Map();
 const queue = [];
 const activeChats = new Map();
 const shareRequests = new Map();
-const MAX_DISTANCE = 20000000; // 20,000 km
+const MAX_DISTANCE = 20000000; // 
 
 const genderKeyboard = {
   reply_markup: {
@@ -125,9 +124,7 @@ bot.onText(/⏩ Skip/, msg => {
   }
   activeChats.delete(id);
   const user = users.get(id);
-  if (!user?.location || !user?.gender) {
-    return bot.sendMessage(id, '❗ Set gender/location first.', genderKeyboard);
-  }
+  if (!user?.location || !user?.gender) return bot.sendMessage(id, '❗ Set gender/location first.', genderKeyboard);
   const match = findMatch(id);
   if (match) {
     activeChats.set(id, match);
@@ -142,27 +139,10 @@ bot.onText(/⏩ Skip/, msg => {
 bot.onText(/❌ End Chat/, msg => {
   const id = msg.chat.id;
   const partnerId = activeChats.get(id);
-  if (partnerId) {
-    bot.sendMessage(partnerId, '🚫 The stranger has left the chat.');
-    activeChats.delete(partnerId);
-  }
+  if (partnerId) bot.sendMessage(partnerId, '🚫 The stranger has left the chat.');
   activeChats.delete(id);
-  bot.sendMessage(id, '❌ Chat ended. Looking for a new match...');
-
-  const user = users.get(id);
-  if (!user?.location || !user?.gender) {
-    return bot.sendMessage(id, '❗ Please set gender and location first.', genderKeyboard);
-  }
-
-  const match = findMatch(id);
-  if (match) {
-    activeChats.set(id, match);
-    activeChats.set(match, id);
-    bot.sendMessage(id, '🎉 New match found!', mainKeyboard);
-    bot.sendMessage(match, '🎉 New match found!', mainKeyboard);
-  } else {
-    bot.sendMessage(id, '🔎 Looking for another partner...', preChatKeyboard);
-  }
+  activeChats.delete(partnerId);
+  bot.sendMessage(id, '❌ Chat ended.', preChatKeyboard);
 });
 
 bot.onText(/\uD83D\uDC64 Share Telegram ID/, msg => {
@@ -220,3 +200,7 @@ bot.on('message', msg => {
     else if (msg.voice) bot.sendVoice(partnerId, msg.voice.file_id);
   }
 });
+
+
+
+
