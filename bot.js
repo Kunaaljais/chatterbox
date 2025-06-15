@@ -1,13 +1,14 @@
 const TelegramBot = require('node-telegram-bot-api');
 const haversine = require('haversine-distance');
 const { v4: uuidv4 } = require('uuid');
+
 const bot = new TelegramBot('7939545908:AAGqUfdD0RkS_VyqRYJAFfru37bDwufEzs0', { polling: true });
 
 const users = new Map();
 const queue = [];
 const activeChats = new Map();
 const shareRequests = new Map();
-const MAX_DISTANCE = 20000000; // 
+const MAX_DISTANCE = 20000000; // meters
 
 const genderKeyboard = {
   reply_markup: {
@@ -28,8 +29,8 @@ const locationKeyboard = {
 const preChatKeyboard = {
   reply_markup: {
     keyboard: [
-      ['🔁 Change Location', '🔄 Change Gender'],
-      ['❌ End Chat']
+      ['➡️ Next'],
+      ['🔁 Change Location', '🔄 Change Gender']
     ],
     resize_keyboard: true,
     one_time_keyboard: false
@@ -39,8 +40,7 @@ const preChatKeyboard = {
 const mainKeyboard = {
   reply_markup: {
     keyboard: [
-      ['⏩ Skip', '❌ End Chat'],
-      ['🎙️ Voice Call', '🎥 Video Call'],
+      ['➡️ Next', '❌ End Chat'],
       ['👤 Share Telegram ID', '✅ Accept ID Share'],
       ['🔁 Change Location', '🔄 Change Gender']
     ],
@@ -115,11 +115,11 @@ bot.on('location', msg => {
   }
 });
 
-bot.onText(/⏩ Skip/, msg => {
+bot.onText(/➡️ Next/, msg => {
   const id = msg.chat.id;
   const partnerId = activeChats.get(id);
   if (partnerId) {
-    bot.sendMessage(partnerId, '⏩ The stranger skipped the chat.');
+    bot.sendMessage(partnerId, '➡️ The stranger skipped the chat.');
     activeChats.delete(partnerId);
   }
   activeChats.delete(id);
@@ -165,26 +165,6 @@ bot.onText(/✅ Accept ID Share/, msg => {
   shareRequests.delete(id);
 });
 
-bot.onText(/🎥 Video Call/, msg => {
-  const id = msg.chat.id;
-  const partnerId = activeChats.get(id);
-  if (!partnerId) return bot.sendMessage(id, '❌ You are not in a chat.', preChatKeyboard);
-  const roomId = uuidv4().slice(0, 8);
-  const videoLink = `https://meet.jit.si/${roomId}`;
-  bot.sendMessage(id, `🎥 Join video call: ${videoLink}`);
-  bot.sendMessage(partnerId, `🎥 Your partner started a video call: ${videoLink}`);
-});
-
-bot.onText(/🎙️ Voice Call/, msg => {
-  const id = msg.chat.id;
-  const partnerId = activeChats.get(id);
-  if (!partnerId) return bot.sendMessage(id, '❌ You are not in a chat.', preChatKeyboard);
-  const roomId = uuidv4().slice(0, 8);
-  const voiceLink = `https://meet.jit.si/${roomId}`;
-  bot.sendMessage(id, `🎙️ Join voice call: ${voiceLink}`);
-  bot.sendMessage(partnerId, `🎙️ Your partner started a voice call: ${voiceLink}`);
-});
-
 bot.on('message', msg => {
   const id = msg.chat.id;
   const partnerId = activeChats.get(id);
@@ -200,7 +180,3 @@ bot.on('message', msg => {
     else if (msg.voice) bot.sendVoice(partnerId, msg.voice.file_id);
   }
 });
-
-
-
-
